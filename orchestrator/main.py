@@ -6,6 +6,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 import requests
 from deps import RCMState
 from workflows import build_workflow
+import uuid
 
 
 # Wrap agents as Prefect tasks
@@ -56,7 +57,12 @@ def task_registry() -> Dict[str, Any]:
 # Prefect Flow
 # @flow
 def rcm_pipeline(steps, workflow_type: str, file_path: str) -> RCMState:
-    
+    """
+    Run RCM workflow based on selected steps.
+
+    Lets us run different workflows based on user needs. Also for proper intergration with different UI's.
+    """
+
     # Initial state
     state = {"workflow_type": workflow_type, "success": True, "retry_count": 0, "file_path": file_path}
     workflow = build_workflow(steps, task_registry())
@@ -64,7 +70,8 @@ def rcm_pipeline(steps, workflow_type: str, file_path: str) -> RCMState:
     memory = InMemorySaver()
     app = workflow.compile(checkpointer=memory)
 
-    thread_id = "rcm_thread_1"
-    
+    id = str(uuid.uuid4())
+    thread_id = f"rcm_thread_{id}"
+
     final_state = app.invoke(state, config={"configurable": {"thread_id": thread_id}})
     return final_state

@@ -1,4 +1,4 @@
-FROM python:3.12.10-alpine as adapter
+FROM python:3.12.10-alpine
 
 ENV PIP_ROOT_USER_ACTION=ignore
 ENV NETRC=/run/secrets/netrc

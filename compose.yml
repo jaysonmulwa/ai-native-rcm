@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   orchestrator:
     build:
       context: ./orchestrator
@@ -11,9 +10,10 @@ services:
     profiles: ["orchestrator", "agents"]
     volumes:
       - ./:/app
+      - ./uploads:/uploads
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     ports:
       - "3000:3000"
     networks:
@@ -28,9 +28,12 @@ services:
     profiles: ["agents"]
     volumes:
       - ./:/app
+      - ./uploads:/uploads
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
     ports:
       - "8000:8000"
     networks:
@@ -45,9 +48,12 @@ services:
     profiles: ["agents"]
     volumes:
       - ./:/app
+      - ./uploads:/uploads
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
     ports:
       - "8001:8001"
     networks:
@@ -62,11 +68,74 @@ services:
     profiles: ["agents"]
     volumes:
       - ./:/app
+      - ./uploads:/uploads
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
     ports:
       - "8002:8002"
+    networks:
+      - rcm_net
+  
+  medical_coding_agent:
+    build:
+      context: ./agents/medical_coding_agent
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["agents"]
+    volumes:
+      - ./:/app
+      - ./uploads:/uploads
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+    ports:
+      - "8003:8003"
+    networks:
+      - rcm_net
+  
+  claim_scrubbing_agent:
+    build:
+      context: ./agents/claim_scrubbing_agent
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["agents"]
+    volumes:
+      - ./:/app
+      - ./uploads:/uploads
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+    ports:
+      - "8004:8004"
+    networks:
+      - rcm_net
+  
+  claim_submission_agent:
+    build:
+      context: ./agents/claim_submission_agent
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["agents"]
+    volumes:
+      - ./:/app
+      - ./uploads:/uploads
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+    ports:
+      - "8005:8005"
     networks:
       - rcm_net
 
@@ -75,16 +144,17 @@ services:
     restart: always
     profiles: ["redis", "agents"]
     ports:
-      - "0.0.0.0:6379:6379"
+      - "0.0.0.0:${REDIS_PORT}:${REDIS_PORT}"
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
     networks:
       - rcm_net
-
+  
 volumes:
   redis_data:
     driver: local
+  uploads:
 
 networks:
   rcm_net:

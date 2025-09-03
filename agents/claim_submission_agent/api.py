@@ -1,19 +1,11 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-import os
-import shutil
-from pathlib import Path
 from main import run_agent
 
-app = FastAPI(title="Eligibility Agent", version="1.0.0")
-
-class RunRequest(BaseModel):
-    workflow_type: str
-    file_path: str
+app = FastAPI(title="Claim Submission Agent", version="1.0.0")
 
 @app.post("/run")
-async def run(request: RunRequest):
+async def run():
     """
     Upload a file to the server
     
@@ -25,10 +17,7 @@ async def run(request: RunRequest):
     """
 
     try:
-        initial_state = {
-            "workflow_type": request.workflow_type, 
-            "file_path": request.file_path,
-        }
+        initial_state = {}
         final_state = run_agent(initial_state)
 
         return JSONResponse(
@@ -47,4 +36,4 @@ async def run(request: RunRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8005)

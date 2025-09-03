@@ -1,6 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 import os
 import shutil
 from pathlib import Path
@@ -8,11 +7,12 @@ from main import rcm_pipeline
 
 app = FastAPI(title="RCM interface", version="1.0.0")
 
-class RunRequest(BaseModel):
-    workflow_type: str
+UPLOAD_DIR = Path("/uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
 
 @app.post("/run")
-async def run(request: RunRequest):
+async def run(workflow_type: str = Form(...), file: UploadFile = File(...)):
     """
     Run different workflows as required
     
@@ -23,8 +23,17 @@ async def run(request: RunRequest):
         JSON response with upload status and file info
     """
 
-    steps = []
-    workflow_type = request.workflow_type
+    # Save uploaded file
+    file_path = UPLOAD_DIR / file.filename
+    
+    try:
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
+    
+
+    print(workflow_type, file_path)
 
     if workflow_type == "eligibility_only":
         steps = ["eligibility"]
@@ -32,17 +41,20 @@ async def run(request: RunRequest):
         steps = ["clinical_doc"]
     elif workflow_type == "prior_auth_only":
         steps = ["prior_auth"]
-    elif workflow_type == "eligibility_clinical":
-        steps = ["eligibility", "clinical_doc"]
-    elif workflow_type == "clinical_prior_auth":
-        steps = ["clinical_doc", "prior_auth"]
-    elif workflow_type == "eligibility_prior_auth":
-        steps = ["eligibility", "prior_auth"]
+    elif workflow_type == "pre_auth_clinical_doc":
+        steps = [
+            "eligibility",
+            "prior_auth",
+            "clinical_doc",
+        ]
     elif workflow_type == "full":
         steps = [
             "eligibility",
-            "clinical_doc",
             "prior_auth",
+            "clinical_doc",
+            "medical_coding",
+            "claim_scrubbing",
+            "claim_submission",
         ]
     else:
         raise HTTPException(
@@ -50,7 +62,7 @@ async def run(request: RunRequest):
             detail=f"Invalid workflow type: {workflow_type}"
         )
 
-    result = rcm_pipeline(steps, workflow_type="full")
+    result = rcm_pipeline(steps, workflow_type="full", file_path=str(file_path))
     print("\n=== Final Result ===")
     print(result)
 

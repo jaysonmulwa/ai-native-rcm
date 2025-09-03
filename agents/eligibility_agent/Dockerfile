@@ -1,7 +1,16 @@
-FROM python:3.12.10-alpine as adapter
+#FROM python:3.12.10-alpine
+FROM python:3.12.10-slim
 
 ENV PIP_ROOT_USER_ACTION=ignore
 ENV NETRC=/run/secrets/netrc
+
+
+# Install system dependencies (tesseract + libraries)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    libtesseract-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
 

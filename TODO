@@ -1,0 +1,23 @@
+03/09/2025 
+- Dockerize for microservices.
+- Add Redis for state management.
+- Add Redis for Queueing tasks.
+- Establish basic agent/ orchestrator structure.
+- Add provision for invoking custom workflows.
+[5hrs]
+
+
+- Develop First 3 agents to full functionality:
+- - eligibility - OCR and image uploaf
+- - prior-auth - LLM to determin confidence levels.
+- - clinical docs - LLM to generate clinical docs.
+- Test out agent autonomy, retries, state persistence, error handling, extra needed tools, workflow requests.
+- Get requests for the above 3 inorder to populate frontend.
+[5hrs]
+
+
+04/09/2025
+- Add other agents.
+- Create frontend.
+- Develop access levels for patients and admin.
+- Host.

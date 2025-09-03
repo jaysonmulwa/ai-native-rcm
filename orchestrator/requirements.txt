@@ -5,3 +5,4 @@ openai
 redis
 rq
 pytesseract
+python-multipart

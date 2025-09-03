@@ -4,4 +4,4 @@ langgraph-checkpoint
 openai
 redis
 rq
-pytesseract
+cohere

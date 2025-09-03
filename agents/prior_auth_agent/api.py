@@ -1,8 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-import os
-import shutil
-from pathlib import Path
 from main import run_agent
 
 app = FastAPI(title="Prior Auth Agent", version="1.0.0")
@@ -19,10 +16,10 @@ async def run():
         JSON response with upload status and file info
     """
 
-    initial_state = {"transcript": "Patient has insurance ID ABC123456."}
-    final_state = run_agent(initial_state)
-
     try:
+        initial_state = {}
+        final_state = run_agent(initial_state)
+
         return JSONResponse(
             status_code=200,
             content={

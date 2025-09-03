@@ -6,3 +6,5 @@ redis
 rq
 fastapi
 pytesseract
+python-multipart
+cohere

@@ -1,0 +1,8 @@
+prefect
+langgraph
+langgraph-checkpoint
+openai
+redis
+rq
+fastapi
+pytesseract

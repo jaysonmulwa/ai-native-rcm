@@ -1,0 +1,91 @@
+version: "3.9"
+
+services:
+
+  orchestrator:
+    build:
+      context: ./orchestrator
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["orchestrator", "agents"]
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "3000:3000"
+    networks:
+      - rcm_net
+
+  eligibility_agent:
+    build:
+      context: ./agents/eligibility_agent
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["agents"]
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8000:8000"
+    networks:
+      - rcm_net
+  
+  prior_auth_agent:
+    build:
+      context: ./agents/prior_auth_agent
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["agents"]
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8001:8001"
+    networks:
+      - rcm_net
+  
+  clinical_doc_agent:
+    build:
+      context: ./agents/clinical_doc_agent
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    profiles: ["agents"]
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8002:8002"
+    networks:
+      - rcm_net
+
+  redis:
+    image: redis:7.2
+    restart: always
+    profiles: ["redis", "agents"]
+    ports:
+      - "0.0.0.0:6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - rcm_net
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  rcm_net:
+    driver: bridge

@@ -18,6 +18,7 @@
 
 04/09/2025
 - Add other agents.
-- Create frontend.
+- init frontend.
+- dockerize frontend.
 - Develop access levels for patients and admin.
 - Host.

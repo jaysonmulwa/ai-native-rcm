@@ -1,8 +1,12 @@
+from concurrent.futures import thread
 from typing import Dict, Any
 
 class RCMState(Dict[str, Any]):
     workflow_type: str
     file_path: str
+
+    workflow_id: str
+    thread_id: str
 
     eligibility: Any
     prior_auth: Any

@@ -1,7 +1,6 @@
 """
 01-eligibility.py: Extract insurance ID from card image and check eligibility.
 """
-
 import redis
 from rq import Queue
 from typing import Dict, Any
@@ -11,6 +10,10 @@ from openai import OpenAI
 import json
 import requests
 import cohere
+from fastapi import FastAPI, Depends
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
+import models
 
 # client = OpenAI()
 
@@ -20,6 +23,40 @@ mock_db = {
     "XYZ987654": {"status": "Inactive", "plan": "Silver HMO", "copay": "N/A"},
     "5678 1234-A": {"status": "Eligible", "plan": "Gold PPO", "copay": "$25"},
 }
+
+def log_workflow_run(state: Dict[str, Any], db: Session):
+    try:
+        workflow_id = state.get("workflow_id", 0)
+        run = (
+            db.query(models.WorkflowRun)
+            .filter(models.WorkflowRun.workflow_id == workflow_id)
+            .first()
+        )
+        if run:
+            run.current_step = "eligibility"
+            run.updated_at = text("CURRENT_TIMESTAMP")
+            db.commit()
+        print("Logged workflow run to database for workflow_id:", workflow_id)
+    except Exception as e:
+        print("Error logging workflow run:", str(e))
+
+
+def log_eligibility_check(details: Dict[str, Any], workflow_run_id:str, db: Session):
+    try:
+        new_check = models.EligibilityCheck(
+            insurance_id=details.get("insurance_id"),
+            plan=details.get("plan"),
+            copay=details.get("copay"),
+            eligible=details.get("eligible"),
+            created_at=text("CURRENT_TIMESTAMP"),
+            updated_at=text("CURRENT_TIMESTAMP"),
+            workflow_run_id=workflow_run_id
+        )
+        db.add(new_check)
+        db.commit()
+        print("Logged eligibility check to database for insurance_id:", details.get("insurance_id"))
+    except Exception as e:
+        print("Error logging eligibility check:", str(e))
 
 def extract_insurance_details_ocr(image_path) -> str:
     """Extract insurance ID from image using OCR"""
@@ -102,12 +139,9 @@ def persist_to_redis(state: Dict[str, Any], key: str = "eligibility_state") -> N
     r.set("claim:123", "eligibility_passed")
     print(r.get("claim:123"))
 
-def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
-    # insurance_id = "ABC123456"
-    # result = {"eligible": True, "plan": "Gold PPO", "copay": "$25", "insurance_id": insurance_id}
-    # print(f"[EligibilityAgent] {result}")
-    # state["eligibility"] = result
+def run_agent(state: Dict[str, Any], db: Session) -> Dict[str, Any]:
 
+    workflow_run_id = state.get("workflow_id", 0)
 
     if "file_path" in state:
         text = extract_insurance_details_ocr(state["file_path"])
@@ -121,7 +155,10 @@ def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
     else:
         state["success"] = False
         state["error_message"] = "file_path not provided"
-    
+
+    log_workflow_run(state=state, db=db)
+    log_eligibility_check(details=state.get("eligibility", {}), workflow_run_id=workflow_run_id, db=db)
+
     #persist_to_redis(state)
     #enqueue_task(state)
     #dequeue_task()

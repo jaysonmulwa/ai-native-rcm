@@ -2,10 +2,46 @@
 02-clinical-documentation.py: Generate clinical documentation from provider-patient transcript.
 pip install openai
 """
-from typing import Dict, Any
-import json
 import cohere
+import json
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
+import models
+from typing import Dict, Any
 
+
+def log_workflow_run(state: Dict[str, Any], db: Session):
+    try:
+        workflow_id = state.get("workflow_id", 0)
+        run = (
+            db.query(models.WorkflowRun)
+            .filter(models.WorkflowRun.workflow_id == workflow_id)
+            .first()
+        )
+        if run:
+            run.current_step = "clinical_doc"
+            run.updated_at = text("CURRENT_TIMESTAMP")
+            db.commit()
+        print("Logged workflow run to database for workflow_id:", workflow_id)
+    except Exception as e:
+        print("Error logging workflow run:", str(e))
+
+def log_clinical_doc(details: Dict[str, Any], workflow_run_id: str, db: Session):
+    try:
+        new_doc = models.ClinicalDocument(
+            patient_id=details.get("patient_id"),
+            document_type="SOAP Note",
+            content=json.dumps(details),
+            status="Completed",
+            created_at=text("CURRENT_TIMESTAMP"),
+            updated_at=text("CURRENT_TIMESTAMP"),
+            workflow_run_id=workflow_run_id
+        )
+        db.add(new_doc)
+        db.commit()
+        print("Logged clinical document to database for patient_id:", details.get("patient_id"))
+    except Exception as e:
+        print("Error logging clinical document:", str(e))
 
 def generate_clinical_doc(transcript: str):
     """
@@ -58,7 +94,10 @@ def generate_clinical_doc(transcript: str):
     return json.loads(res)
     
     
-def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
+def run_agent(db: Session, state: Dict[str, Any]) -> Dict[str, Any]:
+
+    workflow_run_id = state.get("workflow_id", 0)
+
     sample_transcript = """
     Patient reports chest tightness and shortness of breath for the past 2 days.
     Denies fever or cough. 
@@ -70,6 +109,9 @@ def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
     clinical_doc = generate_clinical_doc(sample_transcript)
     print("=== AI-Generated Clinical Documentation ===")
     print(clinical_doc)
+
+    log_clinical_doc(details=clinical_doc, workflow_run_id=workflow_run_id, db=db)
+    log_workflow_run(state=state, db=db)
 
     state["clinical_doc"] = clinical_doc
     return state

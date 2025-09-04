@@ -1,26 +1,47 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import os
 import shutil
 from pathlib import Path
 from main import rcm_pipeline
+from database import Base, engine, SessionLocal
+from sqlalchemy.orm import Session
+import models
 
+# Create tables at startup
+Base.metadata.create_all(bind=engine)
+
+# initialize FastAPI app
 app = FastAPI(title="RCM interface", version="1.0.0")
 
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Ensure upload directory exists
 UPLOAD_DIR = Path("/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-
+# Define the API endpoints
 @app.post("/run")
-async def run(workflow_type: str = Form(...), file: UploadFile = File(...)):
+async def run(workflow_type: str = Form(...), file: UploadFile = File(...), db: Session = Depends(get_db)):
     """
-    Run different workflows as required
-    
+    Kick off a workflow run based on the specified type.
+
+    The default is a full RCM workflow.
+
+    Currently it is the only one that requires an upload.
+
     Args:
-        file: The file to upload
+        workflow_type (str): Type of workflow to run
+        file (UploadFile): Uploaded file to process
         
     Returns:
-        JSON response with upload status and file info
+        JSONResponse: Result of the workflow execution
     """
 
     # Save uploaded file
@@ -32,8 +53,6 @@ async def run(workflow_type: str = Form(...), file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
     
-
-    print(workflow_type, file_path)
 
     if workflow_type == "eligibility_only":
         steps = ["eligibility"]
@@ -52,9 +71,9 @@ async def run(workflow_type: str = Form(...), file: UploadFile = File(...)):
             "eligibility",
             "prior_auth",
             "clinical_doc",
-            "medical_coding",
-            "claim_scrubbing",
-            "claim_submission",
+            # "medical_coding",
+            # "claim_scrubbing",
+            # "claim_submission",
         ]
     else:
         raise HTTPException(
@@ -62,9 +81,7 @@ async def run(workflow_type: str = Form(...), file: UploadFile = File(...)):
             detail=f"Invalid workflow type: {workflow_type}"
         )
 
-    result = rcm_pipeline(steps, workflow_type="full", file_path=str(file_path))
-    print("\n=== Final Result ===")
-    print(result)
+    result = rcm_pipeline(db=db, steps=steps, workflow_type="full", file_path=str(file_path))
 
     try:
         return JSONResponse(
@@ -81,6 +98,103 @@ async def run(workflow_type: str = Form(...), file: UploadFile = File(...)):
             detail=f"Failed to upload file: {str(e)}"
         )
 
+@app.get("/workflows")
+def get_workflows(db: Session = Depends(get_db)):
+    """
+    Retrieve all workflow runs from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of workflow runs.
+    """
+    workflows = db.query(models.WorkflowRun).all()
+    return workflows
+
+@app.get("/claims")
+def get_claims(db: Session = Depends(get_db)):
+    """
+    Retrieve all claims from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of claims."""
+    claims = db.query(models.Claim).all()
+    return claims
+
+@app.get("/denials")
+def get_denials(db: Session = Depends(get_db)):
+    """
+    Retrieve all denials from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of denials.
+    """
+    denials = db.query(models.Denial).all()
+    return denials
+
+@app.get("/payments")
+def get_payments(db: Session = Depends(get_db)):
+    """
+    Retrieve all payments from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of payments.
+    """
+    payments = db.query(models.Payment).all()
+    return payments
+
+@app.get("/reconciliations")
+def get_reconciliations(db: Session = Depends(get_db)):
+    """
+    Retrieve all reconciliations from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of reconciliations.
+    """
+    reconciliations = db.query(models.Reconciliation).all()
+    return reconciliations
+
+@app.get("/eligibility_checks")
+def get_eligibility_checks(db: Session = Depends(get_db)):
+    """
+    Retrieve all eligibility checks from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of eligibility checks.
+    """
+    eligibility_checks = db.query(models.EligibilityCheck).all()
+    return eligibility_checks
+
+@app.get("/prior_auths")
+def get_prior_auths(db: Session = Depends(get_db)):
+    """
+    Retrieve all prior authorizations from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of prior authorizations.
+    """
+    prior_auths = db.query(models.PriorAuth).all()
+    return prior_auths
+
+@app.get("/clinical_documents")
+def get_clinical_documents(db: Session = Depends(get_db)):
+    """
+    Retrieve all clinical documents from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of clinical documents.
+    """
+    clinical_documents = db.query(models.ClinicalDocument).all()
+    return clinical_documents
+
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3000)
+    uvicorn.run(app, host="0.0.0.0", port=9000)

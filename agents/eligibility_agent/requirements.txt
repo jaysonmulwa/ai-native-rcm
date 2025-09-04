@@ -8,3 +8,5 @@ fastapi
 pytesseract
 python-multipart
 cohere
+sqlalchemy
+psycopg2-binary

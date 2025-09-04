@@ -7,3 +7,5 @@ rq
 pytesseract
 python-multipart
 uuid
+sqlalchemy
+psycopg2-binary

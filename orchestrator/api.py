@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import shutil
 from pathlib import Path
@@ -13,6 +14,18 @@ Base.metadata.create_all(bind=engine)
 
 # initialize FastAPI app
 app = FastAPI(title="RCM interface", version="1.0.0")
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency to get DB session
 def get_db():
@@ -145,6 +158,19 @@ def get_clinical_documents(db: Session = Depends(get_db)):
     """
     clinical_documents = db.query(models.ClinicalDocument).all()
     return clinical_documents
+
+@app.get("/coded_encounters")
+def get_coded_encounters(db: Session = Depends(get_db)):
+    """
+    Retrieve all coded encounters from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of coded encounters.
+    """
+    coded_encounters = db.query(models.ClinicalDocument).all()
+    return coded_encounters
+
 
 @app.get("/claims_scrubbing")
 def get_claims_scrubbing(db: Session = Depends(get_db)):

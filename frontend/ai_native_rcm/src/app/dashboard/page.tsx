@@ -11,11 +11,11 @@ export default function Dashboard() {
             Welcome to your dashboard
           </p>
         </div>
-        
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle>Total Users</CardTitle>
+              <CardTitle>Patient Workflows</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">1,234</div>
@@ -24,7 +24,7 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Revenue</CardTitle>
@@ -36,19 +36,39 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
-              <CardTitle>Active Sessions</CardTitle>
+              <CardTitle>Succesful Claims</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">573</div>
               <p className="text-xs text-muted-foreground">
-                +2% from last hour
+                +2% from last month
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Call to action for Eligibility Checks */}
+        {/* <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Eligibility Checks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Upload a picture of your Medical Insurance card check to ensure you are eligible for medical cover
+              </p>
+              <a
+                href="/dashboard/eligibility"
+                className="inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
+              >
+                Upload
+              </a>
+            </CardContent>
+          </Card>
+        </div> */}
       </div>
     </DashboardLayout>
   )

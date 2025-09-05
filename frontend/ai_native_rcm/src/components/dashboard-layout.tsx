@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Home, User, FileText, Settings, Menu } from "lucide-react"
+import { Home, User, FileText, Settings, Menu, ListChecks, ScanFace, ClipboardPlus} from "lucide-react"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -13,7 +13,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-lg">
         <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-800">Dashboard</h2>
+          <h1 className="text-4xl font-bold text-gray-800">Humaein</h1>
         </div>
         
         <nav className="mt-6">
@@ -28,13 +28,43 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Button>
             </Link>
             
-            <Link href="/dashboard/profile">
+            <Link href="/dashboard/workflows">
               <Button 
                 variant="ghost" 
                 className="w-full justify-start text-left"
               >
-                <User className="mr-3 h-4 w-4" />
-                Profile
+                <FileText className="mr-3 h-4 w-4" />
+                Workflow Runs
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/eligibility_checks">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <ListChecks className="mr-3 h-4 w-4" />
+                Eligibility Checks
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/prior_auths">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <ScanFace className="mr-3 h-4 w-4" />
+                Prior Auths
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/clinical_documents">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <ClipboardPlus className="mr-3 h-4 w-4" />
+                Clinical Documents
               </Button>
             </Link>
 
@@ -47,6 +77,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 Claims
               </Button>
             </Link>
+
+            <Link href="/dashboard/profile">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <User className="mr-3 h-4 w-4" />
+                Profile
+              </Button>
+            </Link>
+
           </div>
         </nav>
       </div>

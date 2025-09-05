@@ -1,58 +1,63 @@
 import cohere
 import json
-   
 from typing import Dict, Any
 
-# Mock payer policy database (in real-world this comes from payer APIs / PDFs)
-payer_policies = {
-    "MRI Brain": {"covered": True, "needs_docs": ["neurological symptoms", "physician referral"]},
-    "Knee Replacement": {"covered": True, "needs_docs": ["X-ray results", "failed conservative therapy"]},
-    "Genetic Testing": {"covered": False, "needs_docs": []},
+# Mock payer claim rules (in real-world this comes from payer APIs / PDFs)
+payer_claim_rules = {
+    "Knee Replacement": {
+        "covered": True,
+        "required_codes": ["27447", "M17.11"],
+        "required_docs": ["operative report", "discharge summary"]
+    },
+    "MRI Brain": {
+        "covered": True,
+        "required_codes": ["70551", "G93.9"],
+        "required_docs": ["radiology report"]
+    },
+    "Genetic Testing": {
+        "covered": False,
+        "required_codes": [],
+        "required_docs": []
+    },
 }
 
-def generate_prior_auth(clinical_note: str, procedure: str):
+def generate_claim_submission(clinical_note: str, procedure: str):
     """
-    Generate PA request and predict approval likelihood
-    
-    OpenAI GPT-4 Example Prompt:
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-    )
-
-    return response.choices[0].message.content
-
+    Generate claim submission draft and predict payment likelihood.
     """
 
-    # Check mock policy rules
-    policy = payer_policies.get(procedure, {"covered": False, "needs_docs": []})
-    needs_docs = ", ".join(policy["needs_docs"]) if policy["needs_docs"] else "None"
-    coverage_status = "Yes" if policy["covered"] else "No"
+    # Check mock claim rules
+    claim_rule = payer_claim_rules.get(procedure, {"covered": False, "required_codes": [], "required_docs": []})
+    required_codes = ", ".join(claim_rule["required_codes"]) if claim_rule["required_codes"] else "None"
+    required_docs = ", ".join(claim_rule["required_docs"]) if claim_rule["required_docs"] else "None"
+    coverage_status = "Yes" if claim_rule["covered"] else "No"
 
     prompt = f"""
-    You are an AI assistant for prior authorization.
-    Create a draft PA request for the procedure: {procedure}.
+    You are an AI assistant for healthcare claim submission.
+    Create a draft claim for the procedure: {procedure}.
     
     Clinical note:
     {clinical_note}
     
-    Payer policy:
+    Payer claim rules:
     - Covered: {coverage_status}
-    - Documentation required: {needs_docs}
+    - Required codes: {required_codes}
+    - Required documentation: {required_docs}
 
     Output format:
     - Patient Clinical Summary
-    - Requested Procedure
-    - Justification (aligned with policy)
-    - Predicted Approval Likelihood (%)
+    - Procedure Performed
+    - ICD/CPT Codes
+    - Documentation Attached
+    - Predicted Payment Likelihood (%)
 
     Required JSON fields:
     {{
         "patient_summary": string,
-        "requested_procedure": string,
-        "justification": string,
-        "approval_likelihood": float (0 to 1)
+        "procedure_performed": string,
+        "codes": list of strings,
+        "documentation": list of strings,
+        "payment_likelihood": float (0 to 1)
     }}
     """
     co = cohere.ClientV2()
@@ -64,22 +69,19 @@ def generate_prior_auth(clinical_note: str, procedure: str):
     res = response.message.content[0].text.strip()
     return json.loads(res)
 
-
 def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
-
     clinical_note = """
     55-year-old male with chronic right knee pain for 3 years. 
     X-ray shows severe osteoarthritis. 
-    Patient has failed conservative therapy (NSAIDs, PT, injections). 
-    Functional limitation: unable to walk more than 50m without pain.
+    Patient underwent right total knee replacement. 
+    Discharge summary: stable, no complications.
     """
 
     procedure = "Knee Replacement"
-    pa_request = generate_prior_auth(clinical_note, procedure)
+    claim = generate_claim_submission(clinical_note, procedure)
 
-    print("=== AI-Generated Prior Authorization Request ===")
-    print(pa_request)
+    print("=== AI-Generated Claim Submission ===")
+    print(claim)
 
-    state["prior_auth"] = pa_request
+    state["claim_submission"] = claim
     return state
-

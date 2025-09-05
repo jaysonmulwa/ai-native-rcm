@@ -1,85 +1,61 @@
-import cohere
 import json
-   
 from typing import Dict, Any
 
-# Mock payer policy database (in real-world this comes from payer APIs / PDFs)
-payer_policies = {
-    "MRI Brain": {"covered": True, "needs_docs": ["neurological symptoms", "physician referral"]},
-    "Knee Replacement": {"covered": True, "needs_docs": ["X-ray results", "failed conservative therapy"]},
-    "Genetic Testing": {"covered": False, "needs_docs": []},
+# Mock payer claim rules (in real-world this comes from payer APIs / PDFs)
+payer_claim_rules = {
+    "MRI Brain": {
+        "required_fields": ["diagnosis_code", "procedure_code", "physician_signature"],
+        "denial_reasons": ["missing documentation", "invalid diagnosis code"],
+    },
+    "Knee Replacement": {
+        "required_fields": ["diagnosis_code", "procedure_code", "operative_report", "pre-op clearance"],
+        "denial_reasons": ["incomplete operative report", "missing pre-op clearance"],
+    },
+    "Genetic Testing": {
+        "required_fields": ["diagnosis_code", "procedure_code", "genetic counseling note"],
+        "denial_reasons": ["not medically necessary", "missing counseling note"],
+    },
 }
 
-def generate_prior_auth(clinical_note: str, procedure: str):
+def scrub_claim(claim: Dict[str, Any], procedure: str) -> Dict[str, Any]:
     """
-    Generate PA request and predict approval likelihood
-    
-    OpenAI GPT-4 Example Prompt:
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-    )
-
-    return response.choices[0].message.content
-
+    Scrub claim for completeness and compliance with payer rules.
+    Returns a dict with status and issues found.
     """
+    rules = payer_claim_rules.get(procedure, {"required_fields": [], "denial_reasons": []})
+    missing_fields = [field for field in rules["required_fields"] if field not in claim or not claim[field]]
+    issues = []
 
-    # Check mock policy rules
-    policy = payer_policies.get(procedure, {"covered": False, "needs_docs": []})
-    needs_docs = ", ".join(policy["needs_docs"]) if policy["needs_docs"] else "None"
-    coverage_status = "Yes" if policy["covered"] else "No"
+    if missing_fields:
+        issues.append(f"Missing fields: {', '.join(missing_fields)}")
 
-    prompt = f"""
-    You are an AI assistant for prior authorization.
-    Create a draft PA request for the procedure: {procedure}.
-    
-    Clinical note:
-    {clinical_note}
-    
-    Payer policy:
-    - Covered: {coverage_status}
-    - Documentation required: {needs_docs}
+    # Example: check for invalid diagnosis code format (mock logic)
+    if "diagnosis_code" in claim and not claim["diagnosis_code"].startswith("M"):
+        issues.append("Diagnosis code does not match expected format (should start with 'M').")
 
-    Output format:
-    - Patient Clinical Summary
-    - Requested Procedure
-    - Justification (aligned with policy)
-    - Predicted Approval Likelihood (%)
-
-    Required JSON fields:
-    {{
-        "patient_summary": string,
-        "requested_procedure": string,
-        "justification": string,
-        "approval_likelihood": float (0 to 1)
-    }}
-    """
-    co = cohere.ClientV2()
-    response = co.chat(
-        model="command-r-plus-08-2024",
-        messages=[{"role": "user", "content": prompt}],
-    )
-
-    res = response.message.content[0].text.strip()
-    return json.loads(res)
-
+    status = "Clean" if not issues else "Issues Found"
+    return {
+        "status": status,
+        "issues": issues,
+        "claim": claim,
+        "procedure": procedure,
+    }
 
 def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
-
-    clinical_note = """
-    55-year-old male with chronic right knee pain for 3 years. 
-    X-ray shows severe osteoarthritis. 
-    Patient has failed conservative therapy (NSAIDs, PT, injections). 
-    Functional limitation: unable to walk more than 50m without pain.
-    """
-
+    # Example claim data
+    claim = {
+        "diagnosis_code": "M17.11",
+        "procedure_code": "27447",
+        "operative_report": "Attached",
+        "pre-op_clearance": "Attached",
+        "physician_signature": "Dr. Smith",
+    }
     procedure = "Knee Replacement"
-    pa_request = generate_prior_auth(clinical_note, procedure)
+    scrubbed = scrub_claim(claim, procedure)
 
-    print("=== AI-Generated Prior Authorization Request ===")
-    print(pa_request)
+    print("=== Claims Scrubbing Agent Output ===")
+    print(json.dumps(scrubbed, indent=2))
 
-    state["prior_auth"] = pa_request
+    state["scrubbed_claim"] = scrubbed
     return state
 

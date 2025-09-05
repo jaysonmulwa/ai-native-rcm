@@ -7,7 +7,7 @@ import { useState } from "react"
 import { useDropzone } from "react-dropzone"
 
 export default function EligibilityChecks() {
-  const BACKEND_API_URL = "http://orchestrator:9000"
+  const BACKEND_API_URL = "http://84.247.129.35:9000"
 
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -28,7 +28,7 @@ export default function EligibilityChecks() {
        setLoading(true) // start loader
       
       try {
-        const response = await fetch(`http://orchestrator:9000/run`, {
+        const response = await fetch(`http://84.247.129.35:9000/run`, {
           method: 'POST',
           body: formData,
         })

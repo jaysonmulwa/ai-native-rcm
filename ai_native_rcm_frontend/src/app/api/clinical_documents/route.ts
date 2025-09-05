@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ClinicalDocument } from '@/types/clinical_documents'
 
-const BACKEND_API_URL = "http://orchestrator:9000"
+const BACKEND_API_URL = "http://84.247.129.35:9000"
 
 export async function GET(request: NextRequest) {
   try {

@@ -10,7 +10,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - BACKEND_API_URL="http://orchestrator:9000"
+      - BACKEND_API_URL="http://84.247.129.35:9000"
     restart: unless-stopped
     networks:
       - rcm_net

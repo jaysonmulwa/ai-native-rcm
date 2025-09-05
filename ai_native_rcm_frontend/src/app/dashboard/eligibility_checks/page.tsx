@@ -28,7 +28,7 @@ export default function EligibilityChecks() {
        setLoading(true) // start loader
       
       try {
-        const response = await fetch(`http://localhost:9000/run`, {
+        const response = await fetch(`http://orchestrator:9000/run`, {
           method: 'POST',
           body: formData,
         })

@@ -7,7 +7,7 @@ import { useState } from "react"
 import { useDropzone } from "react-dropzone"
 
 export default function EligibilityChecks() {
-  const BACKEND_API_URL = process.env.BACKEND_API_URL
+  const BACKEND_API_URL = "http://orchestrator:9000"
 
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)

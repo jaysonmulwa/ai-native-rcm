@@ -1,6 +1,20 @@
 version: "3.9"
 
 services:
+  ai_native_rcm_frontend:
+    build:
+      context: ./ai_native_rcm_frontend
+      dockerfile: Dockerfile
+    profiles: ["agents", "frontend"]
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BACKEND_API_URL="http://orchestrator:9000"
+    restart: unless-stopped
+    networks:
+      - rcm_net
+
   orchestrator:
     build:
       context: ./orchestrator

@@ -1,4 +1,4 @@
-03/09/2025 
+03/09/2025  [done_all]
 - Dockerize for microservices.
 - Add Redis for state management.
 - Add Redis for Queueing tasks.
@@ -7,18 +7,23 @@
 [5hrs]
 
 
-- Develop First 3 agents to full functionality:
+- Develop First 3 agents to full functionality: [done_all]
 - - eligibility - OCR and image uploaf
 - - prior-auth - LLM to determin confidence levels.
 - - clinical docs - LLM to generate clinical docs.
-- Test out agent autonomy, retries, state persistence, error handling, extra needed tools, workflow requests.
+- Test out agent autonomy, retries, state persistence, error handling, extra needed tools, workflow requests. [TODO]
 - Get requests for the above 3 inorder to populate frontend.
 [5hrs]
 
 
 04/09/2025
-- Add other agents.
-- init frontend.
+- Add persistent for artifacts, and get request (postgress) [done]
+- init frontend. [done]
+- connect frontend and backend [done]
+
+- Add remaining agents and corresponding uis.
+- Provision to upload file on fronted to kickoff workflows.
+
 - dockerize frontend.
-- Develop access levels for patients and admin.
+- Fixup Login page to be presentable.
 - Host.

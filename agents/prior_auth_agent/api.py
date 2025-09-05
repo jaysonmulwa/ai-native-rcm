@@ -24,16 +24,6 @@ class RunRequest(BaseModel):
 
 @app.post("/run")
 async def run(request: RunRequest, db: Session = Depends(get_db)):
-    """
-    Upload a file to the server
-    
-    Args:
-        file: The file to upload
-        
-    Returns:
-        JSON response with upload status and file info
-    """
-
     try:
         initial_state = {
             "workflow_type": request.workflow_type, 
@@ -46,7 +36,7 @@ async def run(request: RunRequest, db: Session = Depends(get_db)):
         return JSONResponse(
             status_code=200,
             content={
-                "message": "Run successfully",
+                "message": "Ran successfully",
                 "final_state": final_state
             }
         )

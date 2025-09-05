@@ -37,16 +37,6 @@ class WorkflowRun(Base):
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=False)
 
-class Claim(Base):
-    __tablename__ = "claims"
-    id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(String, index=True, nullable=False)
-    claim_data = Column(String, nullable=False)
-    status = Column(String, index=True, nullable=False)
-    created_at = Column(String, nullable=False)
-    updated_at = Column(String, nullable=False)
-    workflow_run_id = Column(String, nullable=False)
-
 class EligibilityCheck(Base):
     __tablename__ = "eligibility_checks"
     id = Column(Integer, primary_key=True, index=True)
@@ -81,10 +71,52 @@ class ClinicalDocument(Base):
     updated_at = Column(String, nullable=False)
     workflow_run_id = Column(String, nullable=False)
 
+class ClaimsScrubbing(Base):
+    __tablename__ = "claims_scrubbing"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, index=True, nullable=True)
+    procedure_code = Column(String, nullable=False)
+    diagnosis_code = Column(String, nullable=False)
+    operative_report = Column(String, nullable=False)
+    pre_op_clearance = Column(String, nullable=False)
+    physician_signature = Column(String, nullable=False)
+    status = Column(String, index=True, nullable=False)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+    workflow_run_id = Column(String, nullable=False)
+
+class Claim(Base):
+    __tablename__ = "claims"
+    id = Column(Integer, primary_key=True, index=True)
+    claim_id = Column(String, index=True, nullable=False)
+    patient_summary = Column(String, nullable=False)
+    procedure_performed = Column(String, nullable=False)
+    codes = Column(String, nullable=False)
+    documentation = Column(String, nullable=False)
+    payer = Column(String, nullable=False)
+    provider = Column(String, nullable=False)
+    submission_date = Column(String, nullable=False)
+    submission_status = Column(String, nullable=False)
+    tracking_id = Column(String, nullable=False)
+    status = Column(String, index=True, nullable=False)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+    workflow_run_id = Column(String, nullable=False)
+
+class Resubmission(Base):
+    __tablename__ = "resubmissions"
+    id = Column(Integer, primary_key=True, index=True)
+    claim_id = Column(String, nullable=False)
+    status = Column(String, index=True, nullable=False)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+    workflow_run_id = Column(String, nullable=False)
+
 class Denial(Base):
     __tablename__ = "denials"
     id = Column(Integer, primary_key=True, index=True)
     claim_id = Column(Integer, nullable=False)
+    resubmission_id = Column(Integer, nullable=True)
     reason = Column(String, nullable=False)
     status = Column(String, index=True, nullable=False)
     created_at = Column(String, nullable=False)

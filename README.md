@@ -1,6 +1,4 @@
-pip install -r requirements.txt
-
-Traditional RCM
+# Traditional RCM
 =================
 
 Eligibility → Prior-auth approval → Clinical documentation → 
@@ -10,7 +8,7 @@ Medical coding → Claims scrubbing → Claims submission →
 Remittance tracking → Denial management → Claims resubmission → Remittance tracking → Reconciliation.
 
 
-Architecture
+# Architecture
 =================
 
 A. Microservices

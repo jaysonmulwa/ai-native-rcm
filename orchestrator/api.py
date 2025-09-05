@@ -71,9 +71,9 @@ async def run(workflow_type: str = Form(...), file: UploadFile = File(...), db: 
             "eligibility",
             "prior_auth",
             "clinical_doc",
-            # "medical_coding",
-            # "claim_scrubbing",
-            # "claim_submission",
+            "medical_coding",
+            "claim_scrubbing",
+            "claim_submission",
         ]
     else:
         raise HTTPException(
@@ -110,6 +110,54 @@ def get_workflows(db: Session = Depends(get_db)):
     workflows = db.query(models.WorkflowRun).all()
     return workflows
 
+@app.get("/eligibility_checks")
+def get_eligibility_checks(db: Session = Depends(get_db)):
+    """
+    Retrieve all eligibility checks from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of eligibility checks.
+    """
+    eligibility_checks = db.query(models.EligibilityCheck).all()
+    return eligibility_checks
+
+@app.get("/prior_auths")
+def get_prior_auths(db: Session = Depends(get_db)):
+    """
+    Retrieve all prior authorizations from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of prior authorizations.
+    """
+    prior_auths = db.query(models.PriorAuth).all()
+    return prior_auths
+
+@app.get("/clinical_documents")
+def get_clinical_documents(db: Session = Depends(get_db)):
+    """
+    Retrieve all clinical documents from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of clinical documents.
+    """
+    clinical_documents = db.query(models.ClinicalDocument).all()
+    return clinical_documents
+
+@app.get("/claims_scrubbing")
+def get_claims_scrubbing(db: Session = Depends(get_db)):
+    """
+    Retrieve all claims scrubbing from the database.
+    Args:
+        db (Session): Database session dependency.
+    Returns:
+        List of claims scrubbing.
+    """
+    claims_scrubbing = db.query(models.ClaimsScrubbing).all()
+    return claims_scrubbing
+
 @app.get("/claims")
 def get_claims(db: Session = Depends(get_db)):
     """
@@ -117,7 +165,8 @@ def get_claims(db: Session = Depends(get_db)):
     Args:
         db (Session): Database session dependency.
     Returns:
-        List of claims."""
+        List of claims.
+    """
     claims = db.query(models.Claim).all()
     return claims
 
@@ -156,42 +205,6 @@ def get_reconciliations(db: Session = Depends(get_db)):
     """
     reconciliations = db.query(models.Reconciliation).all()
     return reconciliations
-
-@app.get("/eligibility_checks")
-def get_eligibility_checks(db: Session = Depends(get_db)):
-    """
-    Retrieve all eligibility checks from the database.
-    Args:
-        db (Session): Database session dependency.
-    Returns:
-        List of eligibility checks.
-    """
-    eligibility_checks = db.query(models.EligibilityCheck).all()
-    return eligibility_checks
-
-@app.get("/prior_auths")
-def get_prior_auths(db: Session = Depends(get_db)):
-    """
-    Retrieve all prior authorizations from the database.
-    Args:
-        db (Session): Database session dependency.
-    Returns:
-        List of prior authorizations.
-    """
-    prior_auths = db.query(models.PriorAuth).all()
-    return prior_auths
-
-@app.get("/clinical_documents")
-def get_clinical_documents(db: Session = Depends(get_db)):
-    """
-    Retrieve all clinical documents from the database.
-    Args:
-        db (Session): Database session dependency.
-    Returns:
-        List of clinical documents.
-    """
-    clinical_documents = db.query(models.ClinicalDocument).all()
-    return clinical_documents
 
 
 

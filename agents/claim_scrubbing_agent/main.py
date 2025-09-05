@@ -1,4 +1,8 @@
+import cohere
 import json
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
+import models
 from typing import Dict, Any
 
 # Mock payer claim rules (in real-world this comes from payer APIs / PDFs)
@@ -16,6 +20,45 @@ payer_claim_rules = {
         "denial_reasons": ["not medically necessary", "missing counseling note"],
     },
 }
+
+def log_workflow_run(state: Dict[str, Any], db: Session):
+    try:
+        workflow_id = state.get("workflow_id", 0)
+        run = (
+            db.query(models.WorkflowRun)
+            .filter(models.WorkflowRun.workflow_id == workflow_id)
+            .first()
+        )
+        if run:
+            run.current_step = "claim_scrubbing"
+            run.updated_at = text("CURRENT_TIMESTAMP")
+            db.commit()
+        print("Logged workflow run to database for workflow_id:", workflow_id)
+    except Exception as e:
+        print("Error logging workflow run:", str(e))
+
+def log_claim_scrubbed(details: Dict[str, Any], workflow_run_id: str, db: Session):
+    try:
+        new_claim_scrub = models.ClaimsScrubbing(
+            procedure_code=details["claim"].get("procedure_code"),
+            diagnosis_code=details["claim"].get("diagnosis_code"),
+            operative_report=details["claim"].get("operative_report"),
+            pre_op_clearance=details["claim"].get("pre-op_clearance"),
+            physician_signature=details["claim"].get("physician_signature"),
+            status=details.get("status"),
+            # You may want to store issues as a string or JSON
+            # If you have an 'issues' column, otherwise remove this
+            created_at=text("CURRENT_TIMESTAMP"),
+            updated_at=text("CURRENT_TIMESTAMP"),
+            workflow_run_id=workflow_run_id
+        )
+
+        db.add(new_claim_scrub)
+        db.commit()
+        print("Logged claim scrubbed to database for procedure:", details.get("procedure"))
+    except Exception as e:
+        print("Error logging claim scrubbed:", str(e))
+
 
 def scrub_claim(claim: Dict[str, Any], procedure: str) -> Dict[str, Any]:
     """
@@ -41,7 +84,10 @@ def scrub_claim(claim: Dict[str, Any], procedure: str) -> Dict[str, Any]:
         "procedure": procedure,
     }
 
-def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
+def run_agent(db: Session, state: Dict[str, Any]) -> Dict[str, Any]:
+
+    workflow_run_id = state.get("workflow_id", 0)
+
     # Example claim data
     claim = {
         "diagnosis_code": "M17.11",
@@ -55,6 +101,9 @@ def run_agent(state: Dict[str, Any]) -> Dict[str, Any]:
 
     print("=== Claims Scrubbing Agent Output ===")
     print(json.dumps(scrubbed, indent=2))
+
+    log_claim_scrubbed(details=scrubbed, workflow_run_id=workflow_run_id, db=db)
+    log_workflow_run(state=state, db=db)
 
     state["scrubbed_claim"] = scrubbed
     return state

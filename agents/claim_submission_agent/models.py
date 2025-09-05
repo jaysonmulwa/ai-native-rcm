@@ -80,7 +80,7 @@ class ClaimsScrubbing(Base):
     operative_report = Column(String, nullable=False)
     pre_op_clearance = Column(String, nullable=False)
     physician_signature = Column(String, nullable=False)
-    status = Column(String, index=True, nullable=False)
+    status = Column(String, index=True, nullable=True)
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=False)
     workflow_run_id = Column(String, nullable=False)

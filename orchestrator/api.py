@@ -69,8 +69,8 @@ async def run(workflow_type: str = Form(...), file: UploadFile = File(...), db: 
     elif workflow_type == "full":
         steps = [
             "eligibility",
-            "prior_auth",
             "clinical_doc",
+            "prior_auth",
             "medical_coding",
             "claim_scrubbing",
             "claim_submission",

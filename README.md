@@ -35,3 +35,14 @@ B. Persistence
 - Redis key-value store for overall system state.
 - Redis Queues for message passing between services/ asynchronous processing.
 - LangGraph checkpointing for agent / workflow state.
+
+
+C. Workflow
+================
+Eligibility → Clinical Docs → Prior Auth → Coding → Scrubbing → Submission
+    ↓
+   (Async Wait for Event)
+    ↓
+  Remittance Tracking → Reconciliation
+  OR
+  Denial Management → (possibly resubmission loop)

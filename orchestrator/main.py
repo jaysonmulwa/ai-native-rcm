@@ -58,8 +58,8 @@ def claim_submission_task(state: RCMState) -> RCMState:
 def task_registry() -> Dict[str, Any]:
     return {
         "eligibility": eligibility_task,
-        "prior_auth": prior_auth_task,
         "clinical_doc": clinical_doc_task,
+        "prior_auth": prior_auth_task,
         "medical_coding": medical_coding_task,
         "claim_scrubbing": claim_scrubbing_task,
         "claim_submission": claim_submission_task,

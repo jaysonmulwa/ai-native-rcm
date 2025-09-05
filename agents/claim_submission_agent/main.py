@@ -55,6 +55,7 @@ def log_claim_submission(details: Dict[str, Any], workflow_run_id: str, db: Sess
             submission_status=details.get("submission_status"),
             tracking_id=details.get("tracking_id"),
             patient_summary=details.get("patient_summary"),
+            status="pending",
             created_at=text("CURRENT_TIMESTAMP"),
             updated_at=text("CURRENT_TIMESTAMP"),
             workflow_run_id=workflow_run_id

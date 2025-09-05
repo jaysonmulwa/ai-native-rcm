@@ -49,6 +49,8 @@ export function ClaimsTable() {
       
       const response = await fetch(`/api/claims?${params}`)
       const data = await response.json()
+
+      console.log('Fetched claims:', data)
       
       if (response.ok) {
         setClaims(data.claims)
@@ -144,20 +146,50 @@ export function ClaimsTable() {
                 <Button
                   variant="ghost"
                   className="h-auto p-0 font-semibold"
-                  onClick={() => handleSort('claimNumber')}
+                  onClick={() => handleSort('claimId')}
                 >
-                  Claim Number
-                  {getSortIcon('claimNumber')}
+                  Claim ID
+                  {getSortIcon('claimID')}
                 </Button>
               </TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
                   className="h-auto p-0 font-semibold"
-                  onClick={() => handleSort('customerName')}
+                  onClick={() => handleSort('trackingID')}
                 >
-                  Customer
-                  {getSortIcon('customerName')}
+                  Tracking ID
+                  {getSortIcon('trackingID')}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-semibold"
+                  onClick={() => handleSort('payer')}
+                >
+                  Payer
+                  {getSortIcon('payer')}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-semibold"
+                  onClick={() => handleSort('provider')}
+                >
+                  Provider
+                  {getSortIcon('provider')}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-semibold"
+                  onClick={() => handleSort('codes')}
+                >
+                  Codes
+                  {getSortIcon('codes')}
                 </Button>
               </TableHead>
               <TableHead>
@@ -166,18 +198,8 @@ export function ClaimsTable() {
                   className="h-auto p-0 font-semibold"
                   onClick={() => handleSort('dateSubmitted')}
                 >
-                  Date Submitted
+                  Submission Date
                   {getSortIcon('dateSubmitted')}
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  className="h-auto p-0 font-semibold"
-                  onClick={() => handleSort('amount')}
-                >
-                  Amount
-                  {getSortIcon('amount')}
                 </Button>
               </TableHead>
               <TableHead>
@@ -188,17 +210,6 @@ export function ClaimsTable() {
                 >
                   Status
                   {getSortIcon('status')}
-                </Button>
-              </TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  className="h-auto p-0 font-semibold"
-                  onClick={() => handleSort('assignedTo')}
-                >
-                  Assigned To
-                  {getSortIcon('assignedTo')}
                 </Button>
               </TableHead>
             </TableRow>
@@ -214,20 +225,38 @@ export function ClaimsTable() {
               claims.map((claim) => (
                 <TableRow key={claim.id}>
                   <TableCell className="font-medium">
-                    {claim.claimNumber}
+                    {claim.claim_id}
                   </TableCell>
-                  <TableCell>{claim.customerName}</TableCell>
-                  <TableCell>{formatDate(claim.dateSubmitted)}</TableCell>
-                  <TableCell>{formatCurrency(claim.amount)}</TableCell>
+                  <TableCell className="font-medium">
+                    {claim.tracking_id}
+                  </TableCell>
+                    <TableCell>
+                    {(() => {
+                      try {
+                      const payerObj = JSON.parse(claim.payer);
+                      return payerObj.name || claim.payer;
+                      } catch {
+                      return claim.payer;
+                      }
+                    })()}
+                    </TableCell>
+                    <TableCell>
+                    {(() => {
+                      try {
+                      const providerObj = JSON.parse(claim.provider);
+                      return providerObj.name || claim.provider;
+                      } catch {
+                      return claim.provider;
+                      }
+                    })()}
+                    </TableCell>
+                  <TableCell>{claim.codes}</TableCell>
+                  <TableCell>{formatDate(claim.submission_date)}</TableCell>
                   <TableCell>
                     <Badge className={statusColors[claim.status]}>
                       {statusLabels[claim.status]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {claim.description}
-                  </TableCell>
-                  <TableCell>{claim.assignedTo || 'Unassigned'}</TableCell>
                 </TableRow>
               ))
             )}

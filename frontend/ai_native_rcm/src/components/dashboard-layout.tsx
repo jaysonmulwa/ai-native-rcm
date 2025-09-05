@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Home, User, FileText, Settings, Menu, ListChecks, ScanFace, ClipboardPlus} from "lucide-react"
+import { Home, User, FileText, Settings, Menu, ListChecks, ScanFace, ClipboardPlus, BrushCleaning, Binary, HandCoins, RefreshCcwDot, Circle, CircleX, DollarSign, PenLine} from "lucide-react"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -48,16 +48,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Button>
             </Link>
 
-            <Link href="/dashboard/prior_auths">
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-left"
-              >
-                <ScanFace className="mr-3 h-4 w-4" />
-                Prior Auths
-              </Button>
-            </Link>
-
             <Link href="/dashboard/clinical_documents">
               <Button 
                 variant="ghost" 
@@ -68,13 +58,83 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Button>
             </Link>
 
+            <Link href="/dashboard/prior_auths">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <ScanFace className="mr-3 h-4 w-4" />
+                Prior Auths
+              </Button>
+            </Link>
+
             <Link href="/dashboard/claims">
               <Button 
                 variant="ghost" 
                 className="w-full justify-start text-left"
               >
-                <FileText className="mr-3 h-4 w-4" />
+                <Binary className="mr-3 h-4 w-4" />
+                Coded Encounters
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/claims">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <BrushCleaning className="mr-3 h-4 w-4" />
+                Scrubbed Claims
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/claims">
+              <Button 
+                variant="ghost"
+                className="w-full justify-start text-left"
+              >
+                <HandCoins className="mr-3 h-4 w-4" />
                 Claims
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/claims">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <CircleX className="mr-3 h-4 w-4" />
+                Denials
+              </Button>
+            </Link>
+
+             <Link href="/dashboard/claims">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <RefreshCcwDot className="mr-3 h-4 w-4" />
+                Resubmissions
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/claims">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <DollarSign className="mr-3 h-4 w-4" />
+                Payment
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/claims">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-left"
+              >
+                <PenLine className="mr-3 h-4 w-4" />
+                Reconcilliations
               </Button>
             </Link>
 

@@ -10,6 +10,7 @@ Remittance tracking → Denial management → Claims resubmission → Remittance
 
 ### General Workflow 
 ====================
+
 Eligibility → Clinical Docs → Prior Auth → Coding → Scrubbing → Submission
     ↓
    (Async Wait for Event)
@@ -72,31 +73,3 @@ Eligibility → Clinical Docs → Prior Auth → Coding → Scrubbing → Submis
 - The Submission agent submits the data to the insurance company. it will also handle resubmissions.
 
 ** Not included here are the Denials Agent, Payment Agent and Reconciliation Agent. which are more async and have possibly a cyclic flow.
-
-
-### 4. Phasing of Modules for Launch
-===========================
-1. Phase 1 (MVP)
-- All agents upto the claim submission agent are somewhat less complex, and can be implemented in a single process, even if this process has some human interaction.
-- Before the next stage we can handle Denials, Resubmissions,Payment and Reconciliation more manually.
-- Integrate with external APIs. 
-- UI may be limited to providers only at this stage.
-
-
-2. Phase 2 (Non-trivial workflow agents)
-- We can the implement the set of steps between Denial and Reconcilliation.
-- At this stage we have an agentic workflow, but it is still a single process. 
-- More rigorous testing is needed. 
-- We can create portal for patients and insurance companies at this stage.
-
-3. Phase 3 (Full AI agents)
-- We can implement the full AI agents, and have them communicate with each other - Reduce human interaction as far as possible.
-- Give Agents decision making power over external APIs and data.
-- Advanced Analytics - Agents can also self correct based on analytics they have prepared and learned.
-- Phase 2 or Phase 3 would be sufficient to launch.
-
-4. Phase 4 (In-house Models)
-- From the data we might have collected, we can fine-tune our models for accuracy (both LLM and traditional ML, NLP and Computer Vision Models)
-
-
-
